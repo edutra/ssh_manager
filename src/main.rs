@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process::Command;
 use dirs::home_dir;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 struct SshConnection {
     name: String,
     host: String,
@@ -20,8 +20,7 @@ fn config_path() -> PathBuf {
     path
 }
 
-fn load_connections() -> Vec<SshConnection> {
-    let path = config_path();
+fn load_connections(path: PathBuf) -> Vec<SshConnection> {
     if path.exists() {
         let data = fs::read_to_string(path).expect("Failed to read config file");
         serde_json::from_str(&data).expect("Failed to parse JSON")
@@ -30,8 +29,8 @@ fn load_connections() -> Vec<SshConnection> {
     }
 }
 
-fn save_connections(connections: &[SshConnection]) {
-    let path = config_path();
+fn save_connections(path: PathBuf, connections: &[SshConnection]) {
+    // let path = config_path();
     fs::create_dir_all(path.parent().unwrap()).expect("Failed to create config directory");
     let data = serde_json::to_string_pretty(connections).expect("Failed to serialize connections");
     fs::write(path, data).expect("Failed to write config file");
@@ -61,7 +60,7 @@ enum Commands {
 fn main() {
     let cli = Cli::parse();
 
-    let mut connections = load_connections();
+    let mut connections = load_connections(config_path());
 
     match cli.command {
         Commands::Add {
@@ -76,7 +75,7 @@ fn main() {
                 port,
                 username,
             });
-            save_connections(&connections);
+            save_connections(config_path(), &connections);
             println!("Connection added!");
         }
         Commands::List => {
@@ -93,7 +92,7 @@ fn main() {
         }
         Commands::Delete { name } => {
             connections.retain(|conn| conn.name != name);
-            save_connections(&connections);
+            save_connections(config_path(), &connections);
             println!("Connection deleted!");
         }
         Commands::Open { name } => {
@@ -115,5 +114,37 @@ fn main() {
                 println!("Connection '{}' not found.", name);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+
+    use super::*;
+    #[test]
+    fn test_config_path() {
+        let path = config_path();
+        assert_eq!(path, home_dir().unwrap().join(".ssh_manager/config.json"));
+    }
+    #[test]
+    fn test_load_connections() {
+
+        let empty_path = Path::new("test_files/empty.json").to_path_buf();
+        let connections = load_connections(empty_path);
+        assert_eq!(connections.len(), 0);
+    }
+    #[test]
+    fn test_save_connections() {
+        let connections = vec![SshConnection {
+            name: "test".to_string(),
+            host: "example.com".to_string(),
+            port: 22,
+            username: "user".to_string(),
+        }];
+        let path = PathBuf::from("test_files/save.json");
+        save_connections(path.clone(), &connections);
+        let loaded = load_connections(path);
+        assert_eq!(connections, loaded);
     }
 }
