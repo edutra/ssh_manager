@@ -1,7 +1,7 @@
-use clap::{Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::PathBuf;
+use clap::{Parser, Subcommand};
+use std::path::{PathBuf, Path};
 use std::process::Command;
 use dirs::home_dir;
 use ansi_term::Colour::{Green, Blue};
@@ -65,6 +65,12 @@ enum Commands {
     Edit {
         nameproperty: String,
         value: String
+    },
+    // Only runs bash script
+    #[command(name = "--snippet", alias = "-s")]
+    Snippet {
+        name: String,
+        path: Box<Path>
     }
 }
 
@@ -148,10 +154,44 @@ fn main() {
             } else {
                 println!("Connection '{}' not found.", name);
             }
-
         }
+        Commands::Snippet { name, path } => {
+            if let Some(conn) = connections.iter().find(|c| c.name == name) {
+                let data = fs::read_to_string(&path).expect("Failed to read snippet file");
+                let ssh_command = format!(
+                    "cat > ~/received_script.sh && chmod +x ~/received_script.sh && ./received_script.sh && rm ~/received_script.sh"
+                );
 
-    }
+                let mut process = Command::new("ssh")
+                    .arg(format!("{}@{}", conn.username, conn.host))
+                    .arg(ssh_command)
+                    .stdin(std::process::Stdio::piped())
+                    .spawn()
+                    .expect("Failed to start SSH process");
+
+                // Write the snippet content to the process's standard input
+                if let Some(ref mut stdin) = process.stdin {
+                    use std::io::Write;
+                    stdin
+                        .write_all(data.as_bytes())
+                        .expect("Failed to write snippet data to SSH process");
+                }
+
+                // Wait for the process to complete
+                let status = process
+                    .wait()
+                    .expect("Failed to wait on SSH process");
+
+                if status.success() {
+                    println!("Snippet executed successfully on the remote host.");
+                } else {
+                    eprintln!("Error: Snippet execution failed with status: {}", status);
+                }
+            } else {
+                eprintln!("Connection with name '{}' not found.", name);
+            }
+            }
+        }
 }
 
 #[cfg(test)]
