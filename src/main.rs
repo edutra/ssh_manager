@@ -61,6 +61,11 @@ enum Commands {
     Delete { name: String },
     #[command(name = "--open", alias = "-o")]
     Open { name: String },
+    #[command(name = "--edit", alias = "-e")]
+    Edit {
+        property: String,
+        value: String
+    }
 }
 
 fn main() {
@@ -124,6 +129,28 @@ fn main() {
                 println!("Connection '{}' not found.", name);
             }
         }
+        Commands::Edit { property, value } => {
+            let vector = property.split('.').collect::<Vec<&str>>();
+            let name = vector.clone()[0];
+            let property = vector.clone()[1];
+
+            if let Some(conn) = connections.iter_mut().find(|c| c.name == name) {
+                match property {
+                    "name" => conn.name = value,
+                    "host" => conn.host = value,
+                    "port" => conn.port = value.parse().expect("Port must be a number"),
+                    "username" => conn.username = value,
+                    "welcome_message" => conn.welcome_message = Some(value),
+                    _ => println!("Invalid property: {}", property),
+                }
+                save_connections(config_path(), &connections);
+                println!("Connection updated!");
+            } else {
+                println!("Connection '{}' not found.", name);
+            }
+
+        }
+
     }
 }
 
