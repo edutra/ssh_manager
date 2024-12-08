@@ -4,7 +4,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 use dirs::home_dir;
-use ansi_term::Colour::Green;
+use ansi_term::Colour::{Green, Blue};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 struct SshConnection {
@@ -63,7 +63,7 @@ enum Commands {
     Open { name: String },
     #[command(name = "--edit", alias = "-e")]
     Edit {
-        property: String,
+        nameproperty: String,
         value: String
     }
 }
@@ -129,11 +129,11 @@ fn main() {
                 println!("Connection '{}' not found.", name);
             }
         }
-        Commands::Edit { property, value } => {
-            let vector = property.split('.').collect::<Vec<&str>>();
+        Commands::Edit { nameproperty, value } => {
+            let vector = nameproperty.split('.').collect::<Vec<&str>>();
             let name = vector.clone()[0];
             let property = vector.clone()[1];
-
+            let new_value = value.clone();
             if let Some(conn) = connections.iter_mut().find(|c| c.name == name) {
                 match property {
                     "name" => conn.name = value,
@@ -144,7 +144,7 @@ fn main() {
                     _ => println!("Invalid property: {}", property),
                 }
                 save_connections(config_path(), &connections);
-                println!("Connection updated!");
+                println!("Property {} of {} connection updated to {}.", property, Blue.paint(name),  Green.paint(new_value));
             } else {
                 println!("Connection '{}' not found.", name);
             }
@@ -178,6 +178,7 @@ mod tests {
             host: "example.com".to_string(),
             port: 22,
             username: "user".to_string(),
+            welcome_message: None,
         }];
         let path = PathBuf::from("test_files/save.json");
         save_connections(path.clone(), &connections);
