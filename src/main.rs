@@ -12,6 +12,7 @@ struct SshConnection {
     host: String,
     port: u16,
     username: String,
+    welcome_message: Option<String>
 }
 
 fn config_path() -> PathBuf {
@@ -51,7 +52,8 @@ enum Commands {
         name: String,
         host: String,
         port: u16,
-        username: String
+        username: String,
+        welcome_message: Option<String>
     },
     #[command(name = "--list", alias = "-l")]
     List,
@@ -72,12 +74,14 @@ fn main() {
             host,
             port,
             username,
+            welcome_message
         } => {
             connections.push(SshConnection {
                 name,
                 host,
                 port,
                 username,
+                welcome_message
             });
             save_connections(config_path(), &connections);
             println!("Connection added!");
@@ -101,13 +105,15 @@ fn main() {
         }
         Commands::Open { name } => {
             if let Some(conn) = connections.iter().find(|c| c.name == name) {
-                let ssh_command = format!("ssh {}@{} -p {}", conn.username, conn.host, conn.port);
+                let ssh_command = format!("ssh -t {}@{} -p {}", conn.username, conn.host, conn.port);
                 println!("Opening SSH connection: {}", ssh_command);
-
                 let mut process = Command::new("ssh")
+                    .arg("-t")
                     .arg(format!("{}@{}", conn.username, conn.host))
                     .arg("-p")
                     .arg(conn.port.to_string())
+                    .arg(format!("echo {:?} ;", conn.welcome_message.clone().unwrap_or("".to_string())))
+                    .arg("exec $SHELL || bash || zsh || sh || /bin/sh")
                     .spawn()
                     .expect("Failed to start SSH process");
 
