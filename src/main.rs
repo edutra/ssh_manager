@@ -4,6 +4,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 use dirs::home_dir;
+use ansi_term::Colour::Green;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 struct SshConnection {
@@ -30,7 +31,6 @@ fn load_connections(path: PathBuf) -> Vec<SshConnection> {
 }
 
 fn save_connections(path: PathBuf, connections: &[SshConnection]) {
-    // let path = config_path();
     fs::create_dir_all(path.parent().unwrap()).expect("Failed to create config directory");
     let data = serde_json::to_string_pretty(connections).expect("Failed to serialize connections");
     fs::write(path, data).expect("Failed to write config file");
@@ -46,14 +46,18 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    #[command(name = "--add", alias = "-a")]
     Add {
         name: String,
         host: String,
         port: u16,
-        username: String,
+        username: String
     },
+    #[command(name = "--list", alias = "-l")]
     List,
+    #[command(name = "--delete", alias = "-d")]
     Delete { name: String },
+    #[command(name = "--open", alias = "-o")]
     Open { name: String },
 }
 
@@ -85,7 +89,7 @@ fn main() {
                 for conn in &connections {
                     println!(
                         "Name: {}, Host: {}, Port: {}, Username: {}",
-                        conn.name, conn.host, conn.port, conn.username
+                        Green.bold().paint(conn.name.clone()), Green.paint(conn.host.clone()), Green.paint(conn.port.to_string()), Green.paint(conn.username.clone())
                     );
                 }
             }
