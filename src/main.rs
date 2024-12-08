@@ -71,6 +71,11 @@ enum Commands {
     Snippet {
         name: String,
         path: Box<Path>
+    },
+    #[command(name = "--url", alias = "-u")]
+    URL {
+        name: String,
+        url: String
     }
 }
 
@@ -190,8 +195,23 @@ fn main() {
             } else {
                 eprintln!("Connection with name '{}' not found.", name);
             }
+        }
+        Commands::URL { name, url } => {
+            if let Some(conn) = connections.iter().find(|c| c.name == name) {
+                let ssh_command = format!("curl {} | tee ~/read.sh && chmod +x ~/read.sh && ~/read.sh && rm ~/read.sh", url);
+                let mut process = Command::new("ssh")
+                    .arg(format!("{}@{}", conn.username, conn.host))
+                    .arg(ssh_command)
+                    .spawn()
+                    .expect("Failed to start SSH process");
+                process
+                    .wait()
+                    .expect("Failed to wait on SSH process");
+            } else {
+                eprintln!("Connection with name '{}' not found.", name);
             }
         }
+    }
 }
 
 #[cfg(test)]
