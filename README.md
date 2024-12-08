@@ -26,33 +26,41 @@ $ ssh_manager <COMMAND>
 
 ### Commands
 
-- `add`\
+- `Add a connection`\
   Add a new SSH connection. You will be prompted to enter the name and details of the connection.
 
   ```bash
-  $ ssh_manager add <NAME> <HOST> <PORT> <USERNAME>
+  $ ssh_manager [--add|-a] <NAME> <HOST> <PORT> <USERNAME> [WELCOMME_MESSAGE]
   ```
 
-- `list`\
+- `List all connections`\
   List all saved SSH connections.
 
   ```bash
-  $ ssh_manager list
+  $ ssh_manager [--list|-l]
   ```
 
-- `delete`\
+- `Delete a connectiion`\
   Delete an SSH connection by its name.
 
   ```bash
-  $ ssh_manager delete <NAME>
+  $ ssh_manager [--delete|-d] <NAME>
   ```
 
-- `open`\
+- `Open a connectionn`\
   Open an SSH connection by its name.
 
   ```bash
-  $ ssh_manager open <NAME>
+  $ ssh_manager [--open|-o] <NAME>
   ```
+
+  - `Open an SSH connection by its name.`\
+  
+ Edit a connection's propertyy
+  ```bash
+  $ ssh_manager [--edit|-e] <NAME.PRPERTY> <NEW_VALUE>
+  ```
+
 
 - `help`\
   Print help information for the available commands.
