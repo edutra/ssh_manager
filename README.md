@@ -55,8 +55,7 @@ $ ssh_manager <COMMAND>
   ```
 
   - `Open an SSH connection by its name.`\
-  
- Edit a connection's propertyy
+  Edit a connection's propertyy
   ```bash
   $ ssh_manager [--edit|-e] <NAME.PRPERTY> <NEW_VALUE>
   ```
