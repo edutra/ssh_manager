@@ -91,7 +91,3 @@ $ ssh_manager open name
 
 Contributions are welcome! Feel free to submit a pull request or open an issue for suggestions or bug reports.
 
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for more details.
-
