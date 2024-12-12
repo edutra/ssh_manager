@@ -1,17 +1,26 @@
 # SSH Manager CLI
 
-A simple CLI tool for managing your SSH connections.
+A powerful and user-friendly CLI tool to manage your SSH connections effectively.
 
 ## Overview
 
-SSH Manager allows you to easily add, list, delete, and open SSH connections through a command-line interface. This tool is designed to streamline SSH management, making it easier to work with multiple servers or remote machines.
+SSH Manager simplifies managing multiple SSH connections by allowing you to add, list, delete, and open connections directly from the command line. With additional features like editing connection details, running scripts remotely, and executing commands from URLs, SSH Manager is a versatile tool for developers and system administrators.
+
+## Features
+
+- **Add new SSH connections** with custom details like name, host, port, username, and optional welcome messages.
+- **List saved connections** in a formatted output.
+- **Delete or edit existing connections** easily by name.
+- **Open connections** seamlessly using pre-configured settings.
+- **Execute remote scripts** or download and execute commands from URLs.
+- Simple **JSON-based configuration** for storing and retrieving connection details.
 
 ## Installation
 
-Clone the repository and install the tool:
+Clone the repository and build the tool:
 
 ```bash
-$ git clone https://github.com/edutra/ssh_manager
+$ git clone https://github.com/your_username/ssh_manager
 $ cd ssh_manager
 $ cargo build --release
 ```
@@ -21,73 +30,67 @@ $ cargo build --release
 The general command format for SSH Manager is:
 
 ```bash
-$ ssh_manager <COMMAND>
+$ ssh_manager <COMMAND> [OPTIONS]
 ```
 
 ### Commands
 
-- `Add a connection`\
-  Add a new SSH connection. You will be prompted to enter the name and details of the connection.
+#### Add a new connection:
+```bash
+$ ssh_manager [--add|-a] <NAME> <HOST> <PORT> <USERNAME> [WELCOME_MESSAGE]
+```
 
-  ```bash
-  $ ssh_manager [--add|-a] <NAME> <HOST> <PORT> <USERNAME> [WELCOMME_MESSAGE]
-  ```
+#### List all connections:
+```bash
+$ ssh_manager [--list|-l]
+```
 
-- `List all connections`\
-  List all saved SSH connections.
+#### Delete a connection:
+```bash
+$ ssh_manager [--delete|-d] <NAME>
+```
 
-  ```bash
-  $ ssh_manager [--list|-l]
-  ```
+#### Open a connection:
+```bash
+$ ssh_manager [--open|-o] <NAME>
+```
 
-- `Delete a connectiion`\
-  Delete an SSH connection by its name.
+#### Edit a connection's property:
+```bash
+$ ssh_manager [--edit|-e] <NAME.PROPERTY> <NEW_VALUE>
+```
 
-  ```bash
-  $ ssh_manager [--delete|-d] <NAME>
-  ```
+#### Run a script remotely:
+```bash
+$ ssh_manager [--snippet|-s] <NAME> <PATH_TO_SCRIPT>
+```
 
-- `Open a connectionn`\
-  Open an SSH connection by its name.
-
-  ```bash
-  $ ssh_manager [--open|-o] <NAME>
-  ```
-
-  - `Open an SSH connection by its name.`\
-  Edit a connection's propertyy
-  ```bash
-  $ ssh_manager [--edit|-e] <NAME.PRPERTY> <NEW_VALUE>
-  ```
-
-
-- `help`\
-  Print help information for the available commands.
-
-  ```bash
-  $ ssh_manager help
-  ```
+#### Execute a URL command:
+```bash
+$ ssh_manager [--url|-u] <NAME> <URL>
+```
 
 ### Options
 
-- `-h`, `--help`\
-  Print help for the tool or the specific subcommand.
+- `-h`, `--help`: Display help for the tool or specific subcommands.
 
 ## Example
 
 To add a new SSH connection:
-
 ```bash
-$ ssh_manager add name foo.bar 6969 myUser
+$ ssh_manager --add myserver example.com 22 myuser "Welcome to My Server"
 ```
 
-To connect to `name`:
-
+To open the connection:
 ```bash
-$ ssh_manager open name
+$ ssh_manager --open myserver
+```
+
+To edit a connection:
+```bash
+$ ssh_manager --edit myserver.username newusername
 ```
 
 ## Contributing
 
-Contributions are welcome! Feel free to submit a pull request or open an issue for suggestions or bug reports.
-
+Contributions are welcome! Feel free to submit a pull request or open an issue to suggest features, report bugs, or improve the documentation.
